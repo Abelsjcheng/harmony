@@ -1,0 +1,16 @@
+{
+  "string": [
+    {
+      "name": "module_desc",
+      "value": "HarmonyOS Skill SDK for IM client, OpenCode skill server, and mini-program interaction"
+    },
+    {
+      "name": "skill_sdk_name",
+      "value": "SkillSDK"
+    },
+    {
+      "name": "skill_sdk_desc",
+      "value": "A powerful SDK for skill-based interactions"
+    }
+  ]
+}

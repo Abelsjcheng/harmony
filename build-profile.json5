@@ -1,0 +1,25 @@
+{
+  "app": {
+    "signingConfigs": [],
+    "products": [
+      {
+        "name": "default",
+        "signingConfig": "default"
+      }
+    ]
+  },
+  "modules": [
+    {
+      "name": "harmony",
+      "srcPath": ".",
+      "targets": [
+        {
+          "name": "default",
+          "applyToProducts": [
+            "default"
+          ]
+        }
+      ]
+    }
+  ]
+}

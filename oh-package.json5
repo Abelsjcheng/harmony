@@ -15,7 +15,11 @@
     "opencode"
   ],
   "ohos": {
-    "apiVersion": "20",
-    "compatibleApiVersion": "20"
-  }
+    "org": "harmony",
+    "buildTool": "hvigor",
+    "directoryLevel": "project",
+    "apiVersion": 20,
+    "compatibleApiVersion": 12
+  },
+  "dependencies": {}
 }
