@@ -1,196 +1,87 @@
-# OpenCode Skill SDK for HarmonyOS
+# Harmony Skill SDK
 
-基于 HarmonyOS API 20 开发的 ArkTS SDK，用于 IM 客户端、OpenCode Skill 服务端、小程序之间的交互。
+HarmonyOS ArkTS SDK for skill server interaction with IM clients, OpenCode skill server, and mini-programs.
 
-## 功能特性
+## Features
 
-- 从 IM 客户端获取 skill 指令、用户输入、群信息
-- 与 skill 服务端建立 WebSocket 会话连接
-- 支持停止生成、重试、多轮对话
-- 会话状态回调（执行中、停止、完成）
-- 会话历史记录本地持久化存储
-- WebSocket 连接上限管理
+- WebSocket-based real-time communication
+- Session state management
+- Local persistent storage using Preferences
+- Multi-round conversation support
+- Retry and reconnection mechanisms
+- Error handling and logging
 
-## 安装
+## Installation
 
 ```bash
-ohpm install @opencode/skill-sdk
+ohpm install @harmony/skill-sdk
 ```
 
-## 快速开始
-
-### 1. 初始化 SDK
+## Quick Start
 
 ```typescript
-import OpenCodeSkillSDK from '@opencode/skill-sdk';
+import SkillSDK from '@harmony/skill-sdk';
+import { MessageListener } from '@harmony/skill-sdk';
 
-const sdk = OpenCodeSkillSDK.getInstance();
+const sdk = SkillSDK.getInstance();
 
-await sdk.init({
-  serverUrl: 'wss://your-server.com/skill',
-  maxConnections: 5,
-  reconnectAttempts: 3,
-  reconnectInterval: 1000,
-  messageTimeout: 30000,
-  storageKey: 'your_storage_key'
-});
-```
+await sdk.initialize({
+  groupId: 'group_123',
+  userId: 'user_456',
+  serverUrl: 'ws://localhost:8080/skill',
+  enablePersistence: true
+}, getContext(this));
 
-### 2. IM 客户端集成
-
-```typescript
-import { SkillInstruction, UserInput, GroupInfo } from '@opencode/skill-sdk';
-
-sdk.registerIMCallbacks({
-  onInstructionReceived: (instruction: SkillInstruction) => {
-    console.log('收到指令:', instruction);
+sdk.addMessageListener({
+  onMessage: (message) => {
+    console.info(message.content);
   },
-  onUserInputReceived: (input: UserInput) => {
-    console.log('收到用户输入:', input);
-  },
-  onGroupInfoReceived: (info: GroupInfo) => {
-    console.log('收到群信息:', info);
+  onStateChange: (state) => {
+    console.info(state.status);
   }
 });
 
-await sdk.processInstruction({
-  skillId: 'skill_001',
-  skillName: 'AI Assistant',
-  action: 'chat'
-});
+await sdk.runSkill('group_123', 'Generate a HarmonyOS app');
 ```
 
-### 3. 启动会话
+## API Reference
 
-```typescript
-import { SessionRequest } from '@opencode/skill-sdk';
+### initialize(config, context)
 
-const sessionId = await sdk.startSession({
-  skillId: 'skill_001',
-  userInput: {
-    userId: 'user_123',
-    userName: '张三',
-    content: '你好，请帮我写一段代码',
-    timestamp: Date.now()
-  },
-  groupInfo: {
-    groupId: 'group_456',
-    groupName: '技术交流群',
-    memberCount: 50
-  },
-  mode: 'multi'
-});
-```
+Initialize the SDK with configuration.
 
-### 4. 小程序多轮对话
+### runSkill(groupId, instruction)
 
-```typescript
-sdk.registerMiniProgramCallbacks({
-  onSessionStateChange: (sessionId, state, data) => {
-    console.log(`会话 ${sessionId} 状态变更: ${state}`);
-  },
-  onMessageReceived: (sessionId, message) => {
-    console.log(`收到消息:`, message);
-  }
-});
+Start a skill execution session.
 
-await sdk.sendMessage(sessionId, '请继续');
-```
+### closeSkill()
 
-### 5. 会话控制
+Close the WebSocket connection.
 
-```typescript
-await sdk.stopSession({
-  sessionId,
-  reason: 'user_requested'
-});
+### stopSkill()
 
-await sdk.retrySession({
-  sessionId,
-  messageId: 'msg_123'
-});
+Stop skill callback without closing connection.
 
-await sdk.closeSession(sessionId);
-```
+### regenerate()
 
-### 6. 获取历史记录
+Regenerate response based on current instruction.
 
-```typescript
-const history = await sdk.getHistory(sessionId);
-const allSessions = await sdk.getAllSessions();
+### getSessionMessage()
 
-await sdk.deleteSession(sessionId);
-await sdk.clearHistory();
-```
+Get all session messages from history.
 
-## API 参考
+### send(content)
 
-### 会话状态 (SessionState)
+Send user input to trigger continuous response.
 
-| 状态 | 说明 |
-|------|------|
-| IDLE | 空闲 |
-| CONNECTING | 连接中 |
-| RUNNING | 执行中 |
-| PAUSED | 已暂停 |
-| STOPPED | 已停止 |
-| COMPLETED | 已完成 |
-| ERROR | 错误 |
-| CLOSED | 已关闭 |
+### getState()
 
-### 主要方法
+Get current session state.
 
-| 方法 | 说明 |
-|------|------|
-| `init(config)` | 初始化 SDK |
-| `startSession(request)` | 创建新会话 |
-| `stopSession(options)` | 停止会话 |
-| `closeSession(sessionId)` | 关闭会话 |
-| `retrySession(options)` | 重试会话 |
-| `sendMessage(sessionId, content)` | 发送消息（多轮对话） |
-| `getHistory(sessionId)` | 获取会话历史 |
-| `getAllSessions()` | 获取所有会话 |
-| `getSessionState(sessionId)` | 获取会话状态 |
-| `deleteSession(sessionId)` | 删除会话 |
-| `clearHistory()` | 清空历史记录 |
+### addMessageListener(listener)
 
-## 配置选项
-
-```typescript
-interface SDKConfig {
-  serverUrl: string;          // WebSocket 服务端地址
-  maxConnections: number;     // 最大连接数（默认：5）
-  reconnectAttempts: number;  // 重连次数（默认：3）
-  reconnectInterval: number;  // 重连间隔 ms（默认：1000）
-  messageTimeout: number;     // 消息超时 ms（默认：30000）
-  storageKey: string;         // 本地存储键名
-}
-```
-
-## 工程结构
-
-```
-src/main/ets/
-├── index.ets                 # SDK 主入口
-├── types/
-│   └── index.ets             # 类型定义
-├── websocket/
-│   └── WebSocketManager.ets  # WebSocket 连接管理
-├── session/
-│   └── SessionManager.ets    # 会话管理
-├── storage/
-│   └── StorageManager.ets    # 本地持久化存储
-└── utils/
-    └── Logger.ets            # 日志工具
-```
-
-## 注意事项
-
-1. 使用前必须调用 `init()` 初始化 SDK
-2. WebSocket 连接数受 `maxConnections` 限制
-3. 会话历史自动持久化到本地存储
-4. 建议在应用退出时调用 `destroy()` 清理资源
+Add message listener for real-time updates.
 
 ## License
 
-MIT
+Apache-2.0

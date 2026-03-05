@@ -1,0 +1,21 @@
+{
+  "name": "@harmony/skill-sdk",
+  "version": "1.0.0",
+  "description": "HarmonyOS Skill SDK for IM client, OpenCode skill server, and mini-program interaction",
+  "main": "./src/main/ets/api/index.ets",
+  "author": "Harmony Skill SDK Team",
+  "license": "Apache-2.0",
+  "repository": "https://github.com/harmony/skill-sdk",
+  "keywords": [
+    "harmony",
+    "arkts",
+    "skill",
+    "websocket",
+    "im",
+    "opencode"
+  ],
+  "ohos": {
+    "apiVersion": "20",
+    "compatibleApiVersion": "20"
+  }
+}

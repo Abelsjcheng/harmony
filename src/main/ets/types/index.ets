@@ -1,93 +1,48 @@
-export enum SessionState {
-  IDLE = 'idle',
-  CONNECTING = 'connecting',
-  RUNNING = 'running',
-  PAUSED = 'paused',
-  STOPPED = 'stopped',
-  COMPLETED = 'completed',
-  ERROR = 'error',
-  CLOSED = 'closed'
-}
-
-export interface SkillInstruction {
-  skillId: string;
-  skillName: string;
-  action: string;
-  parameters?: Record<string, any>;
-}
-
-export interface GroupInfo {
+export interface SkillConfig {
   groupId: string;
-  groupName: string;
-  memberCount: number;
-  members?: string[];
+  userId?: string;
+  serverUrl: string;
+  maxRetries?: number;
+  timeout?: number;
+  enablePersistence?: boolean;
 }
 
-export interface UserInput {
-  userId: string;
-  userName: string;
-  content: string;
-  timestamp: number;
-  groupId?: string;
-}
-
-export interface SessionRequest {
-  sessionId?: string;
-  skillId: string;
-  userInput: UserInput;
-  groupInfo?: GroupInfo;
-  mode?: 'single' | 'multi';
-}
-
-export interface ChatMessage {
-  messageId: string;
-  sessionId: string;
+export interface SkillMessage {
+  id: string;
   role: 'user' | 'assistant' | 'system';
   content: string;
   timestamp: number;
-  status?: 'sending' | 'sent' | 'error';
+  type?: 'text' | 'image' | 'file';
+  metadata?: Record<string, any>;
 }
 
-export interface SessionHistory {
-  sessionId: string;
-  skillId: string;
-  messages: ChatMessage[];
-  createdAt: number;
-  updatedAt: number;
-  state: SessionState;
+export interface SessionState {
+  status: 'idle' | 'executing' | 'stopped' | 'completed' | 'error';
+  sessionId?: string;
+  groupId: string;
+  messageCount: number;
+  lastUpdateTime: number;
+  errorCode?: number;
+  errorMessage?: string;
 }
 
-export type SessionStateCallback = (sessionId: string, state: SessionState, data?: any) => void;
-
-export type MessageCallback = (sessionId: string, message: ChatMessage) => void;
-
-export interface SDKConfig {
-  serverUrl: string;
-  maxConnections: number;
-  reconnectAttempts: number;
-  reconnectInterval: number;
-  messageTimeout: number;
-  storageKey: string;
+export interface SkillResponse {
+  success: boolean;
+  data?: any;
+  error?: {
+    code: number;
+    message: string;
+  };
 }
 
-export interface RetryOptions {
-  sessionId: string;
-  messageId?: string;
-  fromIndex?: number;
+export interface MessageListener {
+  onMessage: (message: SkillMessage) => void;
+  onError?: (error: Error) => void;
+  onStateChange?: (state: SessionState) => void;
 }
 
-export interface StopOptions {
-  sessionId: string;
-  reason?: string;
+export interface SessionOptions {
+  autoReconnect?: boolean;
+  maxReconnectAttempts?: number;
+  reconnectInterval?: number;
 }
-
-export type IMClientCallback = {
-  onInstructionReceived?: (instruction: SkillInstruction) => void;
-  onUserInputReceived?: (input: UserInput) => void;
-  onGroupInfoReceived?: (info: GroupInfo) => void;
-};
-
-export type MiniProgramCallback = {
-  onSessionStateChange?: SessionStateCallback;
-  onMessageReceived?: MessageCallback;
-};

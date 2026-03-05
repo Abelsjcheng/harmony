@@ -1,36 +1,35 @@
 export class Logger {
-  private tag: string;
-  private enabled: boolean = true;
+  private static enabled: boolean = true;
 
-  constructor(tag: string) {
-    this.tag = tag;
+  static enable(): void {
+    this.enabled = true;
   }
 
-  info(message: string): void {
+  static disable(): void {
+    this.enabled = false;
+  }
+
+  static info(tag: string, message: string): void {
     if (this.enabled) {
-      console.info(`[${this.tag}] ${message}`);
+      console.info(`[${tag}] ${message}`);
     }
   }
 
-  warn(message: string): void {
+  static debug(tag: string, message: string): void {
     if (this.enabled) {
-      console.warn(`[${this.tag}] ${message}`);
+      console.debug(`[${tag}] ${message}`);
     }
   }
 
-  error(message: string): void {
+  static warn(tag: string, message: string): void {
     if (this.enabled) {
-      console.error(`[${this.tag}] ${message}`);
+      console.warn(`[${tag}] ${message}`);
     }
   }
 
-  debug(message: string): void {
+  static error(tag: string, message: string): void {
     if (this.enabled) {
-      console.debug(`[${this.tag}] ${message}`);
+      console.error(`[${tag}] ${message}`);
     }
-  }
-
-  setEnabled(enabled: boolean): void {
-    this.enabled = enabled;
   }
 }
