@@ -22,7 +22,7 @@ executeSkill(groupId: string, skillContent: string): Promise<SkillSession>
 
 | 参数名 | 类型 | 必填 | 说明 |
 |--------|------|------|------|
-| chatId | string | 是 | 群组/单聊ID，用于标识当前会话 |
+| chatId | string | 是 | 用于标识当前会话的Id |
 | skillContent | string | 是 | 用户输入的Skill指令内容，即用户发起技能请求的输入 |
 
 ### 出参
@@ -113,7 +113,33 @@ onSessionStatus(sessionId: string, callback: (status: SessionStatus) => void): v
 
 ---
 
-## 5. 重新生成问答接口
+## 5. 小程序状态回调接口
+
+### 接口说明
+
+监听小程序的状态变化，当小程序被关闭或缩小到后台时触发回调，通知上层应用进行相应处理。
+
+### 接口名
+
+```typescript
+onSkillWecodeStatus(callback: (status: SkillWecodeStatus) => void): void
+```
+
+### 入参
+
+| 参数名 | 类型 | 必填 | 说明 |
+|--------|------|------|------|
+| callback | function | 是 | 小程序状态变更回调函数 |
+
+### 出参
+
+| 参数名 | 类型 | 说明 |
+|--------|------|------|
+| status | SkillWecodeStatus | 小程序状态，枚举值：closed（关闭）、minimized（缩小） |
+
+---
+
+## 6. 重新生成问答接口
 
 ### 接口说明
 
@@ -135,48 +161,20 @@ regenerateAnswer(sessionId: string): Promise<AnswerResult>
 
 | 参数名 | 类型 | 说明 |
 |--------|------|------|
-| answer | string | 重新生成的回答内容 |
 | messageId | string | 消息ID，用于标识该回答 |
 
 ---
 
-## 6. 获取当前会话所有历史记录接口
+## 7. 发送AI生成消息结果接口
+
+### 接口说明
+
+将AI生成的消息结果发送到IM客户端，用于将Skill服务端的回答内容同步到IM会话中。
 
 ### 接口名
 
 ```typescript
-getSessionHistory(sessionId: string, persist?: boolean): Promise<Array<ChatMessage>>
-```
-
-### 接口说明
-
-获取当前会话的所有历史记录，可选择是否将数据持久化存储到本地。
-
-### 入参
-
-| 参数名 | 类型 | 必填 | 说明 |
-|--------|------|------|------|
-| sessionId | string | 是 | 会话ID |
-| persist | boolean | 否 | 是否本地持久化存储该数据，默认false |
-
-### 出参
-
-| 参数名 | 类型 | 说明 |
-|--------|------|------|
-| messages | Array<ChatMessage> | 历史消息列表，包含用户消息和AI回答 |
-
----
-
-## 7. 发送消息接口
-
-### 接口说明
-
-发送用户输入的内容，触发会话的持续回答，用于多轮对话场景。
-
-### 接口名
-
-```typescript
-sendMessage(sessionId: string, content: string): Promise<boolean>
+sendMessageToIM(sessionId: string, message: string): Promise<boolean>
 ```
 
 ### 入参
@@ -184,7 +182,7 @@ sendMessage(sessionId: string, content: string): Promise<boolean>
 | 参数名 | 类型 | 必填 | 说明 |
 |--------|------|------|------|
 | sessionId | string | 是 | 会话ID |
-| content | string | 是 | 用户输入的消息内容 |
+| message | string | 是 | AI生成的消息内容 |
 
 ### 出参
 
@@ -194,16 +192,42 @@ sendMessage(sessionId: string, content: string): Promise<boolean>
 
 ---
 
-## 8. 消息监听接口
-
-### 接口说明
-
-持续获取会话的回答，通过注册监听器的方式实时接收服务端推送的回答内容。
+## 8. 获取当前会话的消息列表接口
 
 ### 接口名
 
 ```typescript
-onMessage(sessionId: string, listener: (message: StreamMessage) => void): void
+getSessionMessage(sessionId: string, persist?: boolean): Promise<Array<ChatMessage>>
+```
+
+### 接口说明
+
+获取当前会话的消息列表，将数据持久化存储到本地。
+
+### 入参
+
+| 参数名 | 类型 | 必填 | 说明 |
+|--------|------|------|------|
+| sessionId | string | 是 | 会话ID |
+
+### 出参
+
+| 参数名 | 类型 | 说明 |
+|--------|------|------|
+| messages | Array<ChatMessage> | 历史消息列表，包含用户消息和AI回答 |
+
+---
+
+## 9. 发送消息接口
+
+### 接口说明
+
+发送用户输入的内容，触发会话的持续回答，用于多轮对话场景。同时注册消息监听器，持续获取会话的回答内容。
+
+### 接口名
+
+```typescript
+sendMessage(sessionId: string, content: string, onMessage: (message: StreamMessage) => void): Promise<boolean>
 ```
 
 ### 入参
@@ -211,16 +235,40 @@ onMessage(sessionId: string, listener: (message: StreamMessage) => void): void
 | 参数名 | 类型 | 必填 | 说明 |
 |--------|------|------|------|
 | sessionId | string | 是 | 会话ID |
-| listener | function | 是 | 消息监听回调函数 |
+| content | string | 是 | 用户输入的消息内容 |
+| onMessage | function | 是 | 消息监听回调函数，持续接收服务端推送的回答内容 |
 
 ### 出参
 
 | 参数名 | 类型 | 说明 |
 |--------|------|------|
-| content | string | 回答内容片段 |
-| messageId | string | 消息ID |
-| isFinished | boolean | 是否已完成回答 |
-| timestamp | number | 消息时间戳 |
+| success | boolean | 发送是否成功 |
+
+---
+
+## 10. 小程序控制接口
+
+### 接口说明
+
+执行小程序的关闭或最小化操作，用于控制小程序的生命周期。
+
+### 接口名
+
+```typescript
+controlSkillWeCode(action: SkillWeCodeAction): Promise<boolean>
+```
+
+### 入参
+
+| 参数名 | 类型 | 必填 | 说明 |
+|--------|------|------|------|
+| action | SkillWeCodeAction | 是 | 操作类型：close（关闭）、minimize（最小化） |
+
+### 出参
+
+| 参数名 | 类型 | 说明 |
+|--------|------|------|
+| success | boolean | 操作是否成功 |
 
 ---
 
@@ -233,6 +281,20 @@ onMessage(sessionId: string, listener: (message: StreamMessage) => void): void
 | executing | 执行中 |
 | stopped | 已停止 |
 | completed | 已完成 |
+
+### SkillWecodeStatus
+
+| 枚举值 | 说明 |
+|--------|------|
+| closed | 小程序已关闭 |
+| minimized | 小程序已缩小到后台 |
+
+### SkillWeCodeAction
+
+| 枚举值 | 说明 |
+|--------|------|
+| close | 关闭小程序 |
+| minimize | 最小化小程序 |
 
 ### ChatMessage
 
@@ -260,3 +322,4 @@ onMessage(sessionId: string, listener: (message: StreamMessage) => void): void
 | status | SessionStatus | 会话状态 |
 | groupId | string | 群组ID |
 | createdAt | number | 创建时间 |
+
