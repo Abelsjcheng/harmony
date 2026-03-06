@@ -1,6 +1,94 @@
-export * from './types/index';
-export { SkillSDK, createSkillSDK } from './api/index';
-export { SessionManager } from './core/SessionManager';
-export { WebSocketManager } from './core/WebSocketManager';
-export { PreferenceStorage, SessionMetadata } from './storage/PreferenceStorage';
-export { Logger, LogLevel, LoggerConfig, createTag } from './utils/Logger';
+import {
+  SkillSDKConfig,
+  SkillSession,
+  ChatMessage,
+  PageResult,
+  StreamMessage,
+  SessionStatus,
+  SkillWecodeStatus,
+  SkillWeCodeAction,
+  AnswerResult,
+  SkillWecodeStatusCallback,
+  SessionStatusCallback,
+  StreamMessageCallback,
+  SessionState,
+  MessageRole,
+  ContentType,
+  PermissionResponse,
+  CloseSessionResponse,
+  SendToIMResponse,
+  CreateSessionRequest,
+  SendMessageRequest,
+  ReplyPermissionRequest,
+  StreamUsage,
+  StreamMessageContent,
+  ExecuteSkillResult,
+  CloseSkillResult,
+  StopSkillResult,
+  SendMessageToIMResult,
+  SendMessageResult,
+  ReplyPermissionResult,
+  ControlSkillWeCodeResult
+} from './types';
+import {
+  init,
+  executeSkill,
+  closeSkill,
+  stopSkill,
+  onSessionStatus,
+  onSkillWecodeStatus,
+  regenerateAnswer,
+  sendMessageToIM,
+  getSessionMessage,
+  sendMessage,
+  replyPermission,
+  controlSkillWeCode
+} from './api/skill-api';
+
+export {
+  SkillSDKConfig,
+  SkillSession,
+  ChatMessage,
+  PageResult,
+  StreamMessage,
+  SessionStatus,
+  SkillWecodeStatus,
+  SkillWeCodeAction,
+  AnswerResult,
+  SessionState,
+  MessageRole,
+  ContentType,
+  PermissionResponse,
+  CloseSessionResponse,
+  SendToIMResponse,
+  CreateSessionRequest,
+  SendMessageRequest,
+  ReplyPermissionRequest,
+  StreamUsage,
+  StreamMessageContent,
+  ExecuteSkillResult,
+  CloseSkillResult,
+  StopSkillResult,
+  SendMessageToIMResult,
+  SendMessageResult,
+  ReplyPermissionResult,
+  ControlSkillWeCodeResult,
+  init,
+  executeSkill,
+  closeSkill,
+  stopSkill,
+  onSessionStatus,
+  onSkillWecodeStatus,
+  regenerateAnswer,
+  sendMessageToIM,
+  getSessionMessage,
+  sendMessage,
+  replyPermission,
+  controlSkillWeCode
+};
+
+export type {
+  SessionStatusCallback,
+  SkillWecodeStatusCallback,
+  StreamMessageCallback
+};

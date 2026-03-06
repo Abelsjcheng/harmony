@@ -1,141 +1,173 @@
-export type SessionStatus = 'idle' | 'executing' | 'stopped' | 'completed' | 'error';
-
-export type MessageType = 'text' | 'image' | 'file' | 'audio' | 'video' | 'code';
-
-export type MessageRole = 'user' | 'assistant' | 'system';
-
-export interface SkillConfig {
-  groupId: string;
-  userId?: string;
-  serverUrl: string;
-  maxRetries?: number;
-  timeout?: number;
-  enablePersistence?: boolean;
-  maxConnections?: number;
-  reconnectInterval?: number;
-  headers?: Record<string, string>;
-  protocol?: string;
+export enum SessionStatus {
+  EXECUTING = 'executing',
+  STOPPED = 'stopped',
+  COMPLETED = 'completed'
 }
 
-export interface SkillMessage {
-  id: string;
-  role: MessageRole;
+export enum SkillWecodeStatus {
+  CLOSED = 'closed',
+  MINIMIZED = 'minimized'
+}
+
+export enum SkillWeCodeAction {
+  CLOSE = 'close',
+  MINIMIZE = 'minimize'
+}
+
+export enum MessageRole {
+  USER = 'USER',
+  ASSISTANT = 'ASSISTANT',
+  SYSTEM = 'SYSTEM',
+  TOOL = 'TOOL'
+}
+
+export enum ContentType {
+  MARKDOWN = 'MARKDOWN',
+  CODE = 'CODE',
+  PLAIN = 'PLAIN'
+}
+
+export enum SessionState {
+  ACTIVE = 'ACTIVE',
+  IDLE = 'IDLE',
+  CLOSED = 'CLOSED'
+}
+
+export interface ChatMessage {
+  id: number;
+  sessionId: number;
+  seq: number;
+  role: MessageRole | string;
   content: string;
-  timestamp: number;
-  type?: MessageType;
-  metadata?: Record<string, Object>;
-  isComplete?: boolean;
-  errorCode?: number;
-  errorMessage?: string;
+  contentType: ContentType | string;
+  createdAt: string;
+  meta: string | null;
 }
 
-export interface SessionState {
-  status: SessionStatus;
-  sessionId?: string;
-  groupId: string;
-  messageCount: number;
-  lastUpdateTime: number;
-  errorCode?: number;
-  errorMessage?: string;
-  connectionId?: string;
+export interface StreamMessage {
+  type: 'delta' | 'done' | 'error' | 'agent_offline' | 'agent_online';
+  seq: number;
+  content: string | StreamMessageContent | null;
+  usage?: StreamUsage;
 }
 
-export interface SkillResponse {
+export interface StreamMessageContent {
+  usage?: StreamUsage;
+}
+
+export interface StreamUsage {
+  inputTokens: number;
+  outputTokens: number;
+}
+
+export interface SkillSession {
+  id: number;
+  userId: number;
+  skillDefinitionId: number;
+  agentId: number | null;
+  toolSessionId: string | null;
+  title: string | null;
+  status: SessionState | string;
+  imChatId: string | null;
+  createdAt: string;
+  lastActiveAt: string;
+}
+
+export interface PageResult<T> {
+  content: T[];
+  totalElements: number;
+  totalPages: number;
+  number: number;
+  size: number;
+}
+
+export interface PermissionRequest {
+  permissionId: string;
+  sessionId: number;
+  action: string;
+  approved: boolean;
+}
+
+export interface PermissionResponse {
   success: boolean;
-  data?: Record<string, Object>;
-  error?: SkillError;
+  permissionId: string;
+  approved: boolean;
 }
 
-export interface SkillError {
-  code: number;
-  message: string;
-  details?: Record<string, Object>;
+export interface CloseSessionResponse {
+  status: string;
+  sessionId: string;
 }
 
-export interface MessageListener {
-  onMessage: (message: SkillMessage) => void;
-  onError?: (error: Error) => void;
-  onStateChange?: (state: SessionState) => void;
-  onComplete?: () => void;
+export interface SendToIMResponse {
+  success: boolean;
+  chatId: string;
+  contentLength: number;
 }
 
-export interface ConnectionState {
-  connectionCount: number;
-  maxConnections: number;
-  availableSlots: number;
-  connections: ConnectionInfo[];
+export interface AnswerResult {
+  messageId: string;
+  success: boolean;
 }
 
-export interface ConnectionInfo {
-  connectionId: string;
-  groupId: string;
+export interface ExecuteSkillResult {
+  sessionId: string;
+  status: SessionStatus | string;
+  toolSessionId: string | null;
   createdAt: number;
-  status: 'active' | 'idle' | 'error';
 }
 
-export interface WebSocketConfig {
-  url: string;
-  protocols?: string[];
-  headers?: Record<string, string>;
-  timeout?: number;
+export interface CloseSkillResult {
+  success: boolean;
 }
 
-export interface SkillEvent {
-  type: 'message' | 'state_change' | 'error' | 'complete';
-  data: SkillMessage | SessionState | Error;
-  timestamp: number;
+export interface StopSkillResult {
+  success: boolean;
 }
 
-export interface RetryConfig {
-  maxRetries: number;
-  retryInterval: number;
-  exponentialBackoff?: boolean;
-  maxRetryInterval?: number;
+export interface SendMessageToIMResult {
+  success: boolean;
 }
 
-export interface StorageConfig {
-  enablePersistence: boolean;
-  maxStorageSize?: number;
-  expirationTime?: number;
+export interface SendMessageResult {
+  success: boolean;
 }
 
-export interface SkillSessionOptions {
-  groupId: string;
-  instruction: string;
-  context?: Record<string, Object>;
-  metadata?: Record<string, Object>;
+export interface ReplyPermissionResult {
+  success: boolean;
 }
 
-export interface RegenerateOptions {
-  keepHistory?: boolean;
-  newInstruction?: string;
+export interface ControlSkillWeCodeResult {
+  success: boolean;
 }
 
-export interface StopOptions {
-  force?: boolean;
-  reason?: string;
+export interface CreateSessionRequest {
+  userId: number;
+  skillDefinitionId: number;
+  agentId?: number;
+  title?: string;
+  imChatId?: string;
 }
 
-export const SkillErrorCode = {
-  SUCCESS: 0,
-  UNKNOWN_ERROR: -1,
-  NOT_INITIALIZED: -2,
-  NO_INSTRUCTION: -3,
-  NO_USER_MESSAGE: -4,
-  CONNECTION_LIMIT: -5,
-  CONNECTION_FAILED: -6,
-  SEND_FAILED: -7,
-  STORAGE_ERROR: -8,
-  TIMEOUT: -9,
-  NETWORK_ERROR: -10,
-  SERVER_ERROR: -11,
-  INVALID_PARAM: -12,
-  SESSION_NOT_FOUND: -13,
-} as const;
+export interface SendMessageRequest {
+  content: string;
+}
 
-export const DEFAULT_CONFIG = {
-  MAX_CONNECTIONS: 5,
-  MAX_RETRIES: 3,
-  RECONNECT_INTERVAL: 3000,
-  TIMEOUT: 30000,
-} as const;
+export interface ReplyPermissionRequest {
+  approved: boolean;
+}
+
+export interface ErrorResponse {
+  success: boolean;
+  error?: string;
+}
+
+export type SessionStatusCallback = (status: SessionStatus) => void;
+export type SkillWecodeStatusCallback = (status: SkillWecodeStatus) => void;
+export type StreamMessageCallback = (message: StreamMessage) => void;
+
+export interface SkillSDKConfig {
+  baseUrl: string;
+  skillDefinitionId: number;
+  webSocketHost?: string;
+}

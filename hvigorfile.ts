@@ -1,27 +1,7 @@
-{
-  "apiType": "stageMode",
-  "buildOption": {
-    "externalNativeOptions": {
-      "path": "./src/main/cpp/CMakeLists.txt",
-      "arguments": "",
-      "cppFlags": ""
-    }
-  },
-  "buildOptionSet": [
-    {
-      "name": "release",
-      "arkOptions": {
-        "obfuscation": {
-          "ruleOptions": {
-            "enable": false
-          }
-        }
-      }
-    }
-  ],
-  "targets": [
-    {
-      "name": "default"
-    }
-  ]
+import { appTasks } from '@ohos/hypium';
+import { harmonyService } from '@ohos/harmonyService';
+
+export default {
+  system: appTasks,
+  harmonyService
 }

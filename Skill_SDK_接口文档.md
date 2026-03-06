@@ -1,4 +1,4 @@
-# Skill SDK 接口文档
+# Skill SDK 工程文档
 
 ## 概述
 
@@ -10,7 +10,7 @@
 
 ### 接口说明
 
-与Skill服务端建立WebSocket会话连接，接收IM聊天ID和用户输入的Skill指令内容，触发会话开始。
+与Skill服务端建立WebSocket会话连接，并发送用户消息到服务端触发AI处理。
 
 ### 接口名
 
